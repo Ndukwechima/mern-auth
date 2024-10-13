@@ -1,12 +1,58 @@
-import logo from "./logo.svg";
-import "./App.css";
+import React from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-function App() {
+/** Import All Components*/
+import Register from "./components/register/Register";
+import UserName from "./components/userName/UserName";
+import Password from "./components/password/Password";
+import Reset from "./components/reset/Reset";
+import Recovery from "./components/recovery/Recovery";
+import Profile from "./components/profile/Profile";
+import PageNotFound from "./components/pageNotFound/PageNotFound";
+
+/** root routes */
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <UserName />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
+
+  {
+    path: "/password",
+    element: <Password />,
+  },
+
+  {
+    path: "/reset",
+    element: <Reset />,
+  },
+
+  {
+    path: "/recovery",
+    element: <Recovery />,
+  },
+
+  {
+    path: "/profile",
+    element: <Profile />,
+  },
+
+  {
+    path: "*",
+    element: <PageNotFound />,
+  },
+]);
+
+const App = () => {
   return (
-    <div className="App">
-      <h1>hello world</h1>
-    </div>
+    <main>
+      <RouterProvider router={router} />
+    </main>
   );
-}
+};
 
 export default App;
