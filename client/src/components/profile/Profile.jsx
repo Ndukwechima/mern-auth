@@ -1,30 +1,46 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import avatar from "../../assets/profile.png";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 import { useFormik } from "formik";
+import useFetch from "../../hooks/fetch.hook";
 import { profileValidation } from "../../helper/validate";
 import { convertToBase64 } from "../../helper/convert";
 import styles from "../../styles/Username.module.css";
 import extend from "../../styles/Profile.module.css";
+// import { useAuthStore } from "../../store/store";
+import { updateUser } from "../../helper/helper";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [fileUpload, setFileUpload] = useState();
+  const [{ isLoading, apiData, serverError }] = useFetch();
+  const navigate = useNavigate();
 
   const formik = useFormik({
     initialValues: {
-      firstname: "",
-      lastname: "",
-      email: "admin@gmail.com",
-      mobile: "08107506573",
-      address: "No2b @admin, Lagos",
+      firstname: apiData?.firstname || "",
+      lastname: apiData?.lastname || "",
+      email: apiData?.email || "",
+      mobile: apiData?.mobile || "",
+      address: apiData?.address || "",
     },
+    enableReinitialize: true,
+
     validate: profileValidation,
     validateOnBlur: false,
     validateOnChange: false,
     onSubmit: async (values) => {
-      values = await Object.assign(values, { profile: fileUpload || "" });
-      console.log(values);
+      values = await Object.assign(values, {
+        profile: fileUpload || apiData?.profile || "",
+      });
+      let updatePromise = updateUser(values);
+
+      toast.promise(updatePromise, {
+        loading: "Updating...",
+        success: <b>Updated Successfully!</b>,
+        error: <b>Failed to update!</b>,
+      });
     },
   });
 
@@ -34,6 +50,16 @@ const Profile = () => {
     const base64 = await convertToBase64(e.target.files[0]);
     setFileUpload(base64);
   };
+
+  // logout function handler
+  function handleLogout() {
+    localStorage.removeItem("token");
+    navigate("/");
+  }
+
+  if (isLoading) return <h1 className="text-2xl font-bold">Loading...</h1>;
+  if (serverError)
+    return <h1 className="text-xl text-red-500">{serverError.message}</h1>;
 
   return (
     <div className="container mx-auto">
@@ -54,7 +80,7 @@ const Profile = () => {
             <div className="profile flex justify-center items-center py-4">
               <label htmlFor="profile">
                 <img
-                  src={fileUpload || avatar}
+                  src={apiData?.profile || fileUpload || avatar}
                   alt="avatar"
                   className={`${styles.profile_img} ${extend.profile_img}`}
                 />
@@ -87,7 +113,7 @@ const Profile = () => {
                 <input
                   {...formik.getFieldProps("mobile")}
                   className={`${styles.textbox} ${extend.textbox}`}
-                  type="number"
+                  type="phone"
                   placeholder="Mobile No"
                 />
                 <input
@@ -112,7 +138,7 @@ const Profile = () => {
             <div className="text-center py-4">
               <span className="text-gray-500">
                 Come back later?{" "}
-                <Link to="/" className="text-red-500">
+                <Link onClick={handleLogout} to="/" className="text-red-500">
                   Logout
                 </Link>
               </span>

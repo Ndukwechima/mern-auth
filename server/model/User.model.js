@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema({
-  name: {
+  username: {
     type: String,
     required: [true, "username is required"],
     unique: [true, "username already exists"],
@@ -13,10 +13,17 @@ const UserSchema = new mongoose.Schema({
     unique: false,
   },
 
+  // email: {
+  //   type: String,
+  //   required: [true, "provide a unique and valid email"],
+  //   unique: true,
+  // },
+
   email: {
     type: String,
     required: [true, "provide a unique and valid email"],
-    unique: true,
+    unique: [true, "Email already exists"],
+    match: [/.+\@.+\..+/, "Please enter a valid email address"], // Regex for basic email validation
   },
 
   firstName: { type: String },
